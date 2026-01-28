@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ra12.projecte1.odt.taskRequestDTO;
+import com.ra12.projecte1.odt.taskResponseDTO;
 import com.ra12.projecte1.services.TaskService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +26,8 @@ public class TaskController {
 
     @PostMapping("/task")
     public ResponseEntity<String> createTask(@RequestBody taskRequestDTO task) {
-
-        
-        return service.createTask(task);
+        taskResponseDTO tasca = service.createTask(task);
+        return ;
     }
 
     @PostMapping("/task/{taskId}/add/imatge")

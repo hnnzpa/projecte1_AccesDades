@@ -11,7 +11,7 @@ public class taskRequestDTO {
     private String urlImage;
 
     public Task toTask(){
-        return new Task(nomTaska, sparks, dataLimit, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), urlImage);
+        return new Task(nomTaska, sparks, dataLimit, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), urlImage=null);
     }
 
 }

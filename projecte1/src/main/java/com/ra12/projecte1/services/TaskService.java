@@ -4,13 +4,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Timestamp;
+import java.sql.Date;
 
+import org.hibernate.type.descriptor.jdbc.TimeAsTimestampWithTimeZoneJdbcType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ra12.projecte1.odt.taskRequestDTO;
+import com.ra12.projecte1.odt.taskResponseDTO;
 import com.ra12.projecte1.repository.TaskRepository;
 
 
@@ -23,8 +27,16 @@ public class TaskService {
     @Autowired
     TaskRepository repo;
 
-    public ResponseEntity<String> createTask(taskRequestDTO task){
-        repo.createTask();
+    public taskResponseDTO createTask(taskRequestDTO task){
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        boolean success = repo.createTask(null);
+        
+        if (success){
+            
+        }
+
+        }
+        
     }
 
     

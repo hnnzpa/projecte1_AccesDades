@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import com.ra12.projecte1.model.Task;
+import com.ra12.projecte1.odt.taskRequestDTO;
 
 @Repository
 public class TaskRepository {
@@ -37,7 +38,16 @@ public class TaskRepository {
     //I
 
     //create task
-
+    public boolean createTask(Task task){
+        String sql = "INSERT INTO tasks (nomTaska, sparks, dataLimit, dataCreated, dataUpdated) VALUES (?,?,?,?,?)";
+        try{
+            jdbcTemplate.update(sql,task.getNomTaska(),task.getSparks(),task.getDataLimit(),task.getDataCreated(),task.getDataUpdated());
+            return true;
+        } catch (Exception e){
+            return false;
+        }
+        
+    }
     // read all
 
     // read x id

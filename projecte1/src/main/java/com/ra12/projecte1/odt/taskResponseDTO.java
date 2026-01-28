@@ -9,6 +9,12 @@ public class taskResponseDTO {
     private Timestamp dataLimit;
     private String urlImage;
 
+    public taskResponseDTO(Long id, String nomTaska, int sparks, Timestamp dataLimit){
+        this.id = id;
+        this.nomTaska = nomTaska;
+        this.sparks = sparks;
+        this.dataLimit = dataLimit;
+    }
     @Override
     public String toString() {
         return "Tasca [id=" + id + ", nomTaska=" + nomTaska + ", sparks=" + sparks + ", urlImage=" + urlImage
