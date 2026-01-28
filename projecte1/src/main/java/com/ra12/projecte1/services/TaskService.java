@@ -28,15 +28,11 @@ public class TaskService {
     @Autowired
     TaskRepository repo;
 
-    public taskResponseDTO createTask(taskRequestDTO task){
+    public boolean createTask(taskRequestDTO task){
         Timestamp now = new Timestamp(System.currentTimeMillis());
         boolean success = repo.createTask(null);
         
-        if (success){
-            
-        }
-
-        }
+        return success;
         
     }
 

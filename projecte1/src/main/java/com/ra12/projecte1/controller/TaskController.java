@@ -26,8 +26,9 @@ public class TaskController {
 
     @PostMapping("/task")
     public ResponseEntity<String> createTask(@RequestBody taskRequestDTO task) {
-        taskResponseDTO tasca = service.createTask(task);
-        return ;
+       boolean success = service.createTask(task);
+
+        
     }
 
     @PostMapping("/task/{taskId}/add/imatge")
