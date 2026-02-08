@@ -1,62 +1,64 @@
 package com.ra12.projecte1.logs;
-
 import java.io.BufferedWriter;
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.sql.Timestamp;
+import java.util.Calendar;
 
 import org.springframework.stereotype.Component;
 
 @Component
 public class TaskLogs {
+    private final String LOG_DIRECTORY = "src/main/resources/private/logs/";
 
-    private static final String LOG_DIR = "logs";
-    private static final DateTimeFormatter FILE_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final DateTimeFormatter LOG_DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public TaskLogs(){
 
-    public void logInfo(String className, String methodName, String description) {
-        String timestamp = LocalDateTime.now().format(LOG_DATETIME_FORMAT);
-        String logEntry = String.format("[%s] INFO - %s - %s - %s", 
-                                       timestamp, className, methodName, description);
-        
-        System.out.println(logEntry);
-        writeToFile(logEntry);
     }
 
-    public void logError(String className, String methodName, String description, Exception exception) {
-        String timestamp = LocalDateTime.now().format(LOG_DATETIME_FORMAT);
-        String errorMsg = exception != null ? exception.getMessage() : "Error desconegut";
-        String logEntry = String.format("[%s] ERROR - %s - %s - %s. Exception: %s", 
-                                       timestamp, className, methodName, description, errorMsg);
-        
-        System.out.println(logEntry);
-        writeToFile(logEntry);
+    // Construcció missatges d'error
+    public String error(String classe, String function, String msg){
+
+        Timestamp ara = new Timestamp(System.currentTimeMillis());
+        return String.format("[%s] ERROR - %s - %s - %s",ara.toString(),classe,function,msg);
     }
 
-    private void writeToFile(String logEntry) {
-        try {
-            Path logDirectory = Paths.get(LOG_DIR);
-            if (!Files.exists(logDirectory)) {
-                Files.createDirectories(logDirectory);
-            }
+    // Construcció missatges informatius
+    public String info(String classe, String function, String msg){
 
-            String fileName = "application-" + LocalDateTime.now().format(FILE_DATE_FORMAT) + ".log";
-            Path logFilePath = logDirectory.resolve(fileName);
+        Timestamp ara = new Timestamp(System.currentTimeMillis());
+        return String.format("[%s] INFO - %s - %s - %s",ara.toString(),classe,function,msg);
+    }
 
-            try (BufferedWriter writer = Files.newBufferedWriter(logFilePath, 
-                    StandardOpenOption.CREATE, 
-                    StandardOpenOption.APPEND)) {
-                writer.write(logEntry);
-                writer.newLine();
-            }
+    // Escriptura al fitxer
+    public void writeToFile(String msg){
 
-        } catch (IOException e) {
-            System.err.println("Error escrivint al fitxer de log: " + e.getMessage());
-            e.printStackTrace();
+        
+        // Construim el nom del fitxer amb la data actual
+        Calendar ara = Calendar.getInstance();
+        String filename = String.format("aplicacio-%d-%d-%d.log",ara.get(Calendar.YEAR), ara.get(Calendar.MONTH)+1, ara.get(Calendar.DAY_OF_MONTH));
+        Path directori = Paths.get(LOG_DIRECTORY);
+        Path file = Paths.get(LOG_DIRECTORY+filename);
+
+        // Creem el directori si no existeix
+        try{
+            Files.createDirectories(directori);
+        } catch (Exception e) {
         }
+
+        // Obrim el fitxer, el creem si no existeix i no sobreescrivim les dades anteriors. A l'acabar tanquem el fitxer.
+        try (BufferedWriter writer = Files.newBufferedWriter(file,StandardCharsets.UTF_8,StandardOpenOption.CREATE, StandardOpenOption.APPEND)){
+            
+            writer.append(msg);
+            writer.newLine();
+            
+        } catch(Exception e){
+
+        }
+
+        
+
     }
 }

@@ -1,19 +1,24 @@
 package com.ra12.projecte1.services;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ra12.projecte1.logs.TaskLogs;
 import com.ra12.projecte1.model.Task;
 import com.ra12.projecte1.odt.taskRequestDTO;
+import com.ra12.projecte1.odt.taskResponseDTO;
 import com.ra12.projecte1.repository.TaskRepository;
 
 
@@ -25,22 +30,28 @@ public class TaskService {
 
     @Autowired
     TaskRepository repo;
-    TaskLogs taskLogs;
+    TaskLogs log;
 
     public String[] createTask(taskRequestDTO taskDTO){
         Task task = new Task();
-        task.setNomTaska(taskDTO.getNomTaska());
+        task.setNomTasca(taskDTO.getNomTasca());
         task.setSparks(taskDTO.getSparks());
         task.setDataLimit(taskDTO.getDataLimit());
         
+        String msg = log.info("TaskService", "createTask", "Creant una tasca");
+        log.writeToFile(msg);
+
         try {
             int result = repo.createTask(task);
             if (result > 0) {
-                return new String[]{"ok", "Taska s'ha creat correctament"};
+                log.writeToFile(log.info("TaskService", "createTask", "Usuari creat correctament"));
+                return new String[]{"ok", "Tasca s'ha creat correctament"};
             } else {
-                return new String[]{"e", "No s'ha pogut crear la taska"};
+                log.writeToFile(log.error("TaskService", "createTask", "No s'ha pogut crear l'usuari"));
+                return new String[]{"e", "No s'ha pogut crear la tasca"};
             }
         } catch (Exception e) {
+            log.writeToFile(log.error("TaskService", "createTask", "No s'ha pogut crear l'usuari"));
             return new String[]{"e", e.getMessage()};
         }
     }
@@ -49,7 +60,7 @@ public class TaskService {
     public String[] addImage(Long id, MultipartFile image){
         Task existeix = idExisteix(id);
         if (existeix == null){ // comprobem que la taska amb el id existeixi
-            taskLogs.logError("TaskService", "idExisteix", "Usuari no trobat", null);
+            log.error("TaskService", "idExisteix", "Usuari no trobat");
             return new String[]{"e", "Usuari no trobat"};
         }else { // en cas de que si existeixi:
             try{
@@ -62,34 +73,34 @@ public class TaskService {
                 int resposta = repo.setImagePath(id, urlSencer.toString()); // guardem a la base de dades la url de la imatge
 
                 if (resposta == 0){ // en cas de que s'hagi donat un error (0-no s'ha actualitzat res)
-                    taskLogs.logError("TaskService", "addImage", "L'imatge no s'ha actualitzat", null); // guardem l'error a logs
+                    log.error("TaskService", "addImage", "L'imatge no s'ha actualitzat"); // guardem l'error a logs
                     return new String[] {"e", "No s'ha pogut actualitzar l'imatge"}; // informa
                 }else { 
-                    taskLogs.logInfo("TaskService", "addImage", "La url de la imatge s'ha actualitzat");
+                    log.info("TaskService", "addImage", "La url de la imatge s'ha actualitzat");
                     return new String[] {"ok", "Imatge actualitzada correctament"};
                 }
             }catch (Exception e){ // en cas de que es produeixi un error que no hem previst
-                taskLogs.logError("TaskService", "addImage", "Error de carpetes i files", e);
+                log.error("TaskService", "addImage", "Error de carpetes i files");
                 return new String[] {"e", e.getMessage()};
             }
         }
     }
 
     public int updateTask(Long taskId, Task task) {
-        taskLogs.logInfo("UserService", "updateUser", "Accedint a updateUser amb id: " + userId);
+        log.info("TaskService", "updateTask", "Accedint a updateTask amb id: " + taskId);
         
         try{
             int result = repo.updateTaskById(taskId, task);
             if(result > 0){
-                taskLogs.logInfo("UserService", "updateUser", 
-                    "Usuari amb id " + taskId + " actualitzat correctament");
+                log.info("TaskService", "updateTask", 
+                    "Task amb id " + taskId + " actualitzada correctament");
             }else{
-                taskLogs.logError("UserService", "updateUser", 
-                    "Usuari amb id " + taskId + " no trobat per actualitzar", null);
+                log.error("TaskService", "updateTask", 
+                    "Task amb id " + taskId + " no trobada per actualitzar");
             }
             return result;
         }catch(Exception e){
-            taskLogs.logError("UserService", "updateUser", "Error actualitzant usuari", e);
+            log.error("TaskService", "updateTask", "Error actualitzant taska");
             return 0;
         }
     }
