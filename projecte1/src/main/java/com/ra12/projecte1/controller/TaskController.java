@@ -3,6 +3,7 @@ package com.ra12.projecte1.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,8 +23,26 @@ public class TaskController {
     @Autowired
     TaskService service;
 
-    
+    @GetMapping("/task")
+    public ResponseEntity<String> readAll(){
+        try {
+            String response = service.readAll().toString();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No s'han pogut llegir les tasques");
+        }
+    }
 
+    @GetMapping("/task/{id}")
+    public ResponseEntity<String> readById(@PathVariable long id) {
+        try{
+            String response = service.readById(id).toString();
+            return ResponseEntity.ok(response);
+        } catch (Exception e){
+             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No s'ha pogut llegir la tasca");
+        }
+    }
+    
     @PostMapping("/task")
     public ResponseEntity<String> createTask(@RequestBody taskRequestDTO task) {
         String[] resposta = service.createTask(task);
