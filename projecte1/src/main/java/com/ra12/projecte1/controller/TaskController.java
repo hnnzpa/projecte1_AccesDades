@@ -3,6 +3,7 @@ package com.ra12.projecte1.controller;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ra12.projecte1.model.Task;
 import com.ra12.projecte1.odt.taskRequestDTO;
 import com.ra12.projecte1.services.TaskService;
 
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,6 +40,16 @@ public class TaskController {
             return ResponseEntity.ok(resposta[1]);
         }else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resposta[1]);
+        }
+    }
+
+    @PutMapping("/task/update/{taskId}")
+    public ResponseEntity<String> updateTask(@PathVariable Long taskId, @RequestBody Task task) {
+        int result = service.updateTask(taskId, task);
+        if (result > 0) {
+            return ResponseEntity.ok("Taska modificada correctament.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tas no trobat.");
         }
     }
     
