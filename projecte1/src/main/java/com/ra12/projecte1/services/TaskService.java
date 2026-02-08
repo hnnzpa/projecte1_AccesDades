@@ -22,7 +22,6 @@ import com.ra12.projecte1.odt.taskResponseDTO;
 import com.ra12.projecte1.repository.TaskRepository;
 
 
-
 @Service
 public class TaskService {
 
@@ -31,6 +30,39 @@ public class TaskService {
     @Autowired
     TaskRepository repo;
     TaskLogs log;
+
+    public taskResponseDTO readById(long id){
+
+        String msg;
+        try {
+            Task task = repo.readById(id);
+            msg = log.info("TaskService", "readById", "Consultant la tasca");
+            log.writeToFile(msg);
+            return task.toTaskResponseDTO();
+
+        } catch (Exception e) {
+            msg = log.error("TaskService", "readById", "No s'ha pogut consultar la tasca");
+            log.writeToFile(msg);
+            return new taskResponseDTO();
+        }
+    }
+
+    public List<taskResponseDTO> readAll(){
+        String msg = log.info("TaskService", "readAll", "Consultant tots el usuaris");
+        log.writeToFile(msg);
+        List<taskResponseDTO> tasksResponse = new ArrayList<>();
+
+        try {
+            List<Task> tasks = repo.readAll();
+            for (Task task: tasks){
+                tasksResponse.add(task.toTaskResponseDTO());
+            }
+            return tasksResponse;
+        } catch (Exception e){
+            return tasksResponse;
+        }
+        
+    }
 
     public String[] createTask(taskRequestDTO taskDTO){
         Task task = new Task();
@@ -54,6 +86,62 @@ public class TaskService {
             log.writeToFile(log.error("TaskService", "createTask", "No s'ha pogut crear l'usuari"));
             return new String[]{"e", e.getMessage()};
         }
+    }
+
+    public int createTasks(MultipartFile csv) throws IOException{
+
+        String msg = log.info("TaskService", "createTasks", "Carregant la informació del fitxer " + csv.getName());
+        log.writeToFile(msg);
+
+        int comptador = 0;
+        int erronis = 0;
+
+        
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(csv.getInputStream()))){
+            String linia;
+            int nLinia = 1;
+            while((linia = br.readLine())!= null){
+                String[] c = linia.split(",");
+                try{
+                    repo.createTask(new Task(c[0],Integer.parseInt(c[1]),Timestamp.valueOf(c[2]), now, now));
+                    comptador++;
+                } catch(Exception e){
+                    msg = log.error("TaskService", "createTasks",
+                        String.format("Error en la línia %d del fitxer. Missatge d'error: %s",nLinia,e));
+                    log.writeToFile(msg);
+                    erronis++;
+                }
+                nLinia++;
+            }
+
+        } catch (IOException e){
+            System.err.println("Error d'accès al fitxer: " + e.getMessage());
+           msg = log.error("TasksService", "createTask", "Error de lectura de l'arxiu");
+           log.writeToFile(msg);
+           return -1;
+        }
+        String dir = "src/main/resources/private/csv_processed";
+        Path directory = Paths.get(dir);
+        Path filePath = Paths.get(dir + "/" + csv.getOriginalFilename());
+        
+        // Guardem el csv
+        try{
+            Files.createDirectories(directory);
+            Files.copy(csv.getInputStream(),filePath);
+            
+        }
+        catch (Exception e){
+            System.err.println("No s'ha pogut guardar el csv");
+            msg = log.error("TaskService", "createTasks", "No s'ha pogut guardar l'arxiu");
+            log.writeToFile(msg);
+        }
+        msg = log.info("TaskService", "createTasks",
+            String.format("S'han guardat correctament %d registres i han donat error %d registres",comptador, erronis));
+        log.writeToFile(msg);
+        // Retornem registres creats
+        return comptador;
+
     }
 
     // funció per afegir el url d'on es troba la imatge de la taska
@@ -109,6 +197,47 @@ public class TaskService {
     public Task idExisteix(Long id){
         Task task = repo.findTaskById(id) != null ? repo.findTaskById(id) : null;
         return task;
+    }
+
+    //elimina totes les taskes
+    public int deleteAll(){
+        log.info("TaskService", "deleteAll", "Accedint a deleteAll");
+        try{
+            //funcio del repositori per eliminar tot de la BBDD
+            int result = repo.deleteAll();
+            if(result > 0){ // si el resultat és major que 0, significa que s'ha eliminat alguna taska, per tant guardem un log informatiu
+                log.info("TaskService", "deleteAll", 
+                    "Totes les taskes eliminades correctament");
+            }else{
+                log.error("TaskService", "deleteAll", 
+                    "No s'han trobat taskes per eliminar");
+            }
+            return result;
+        }catch(Exception e){
+            log.error("TaskService", "deleteAll", "Error eliminant les taskes");
+            return 0;
+        }
+    }
+
+    // funció per eliminar una taska a partir del id
+    public int deleteById(Long id){
+        // log per indicar que s'ha accedit a la funció deleteById amb un id concret
+        log.info("TaskService", "deleteById", "Accedint a deleteById amb id: " + id);
+        try{
+            // cridem a la funció del repositori que elimina la taska i guardem el resultat (nombre de registres eliminats)
+            int result = repo.deleteById(id);
+            if(result > 0){ // si el resultat és major que 0, significa que s'ha eliminat una taska, per tant guardem un log informatiu
+                log.info("TaskService", "deleteById", 
+                    "Task amb id " + id + " eliminada correctament");
+            }else{
+                log.error("TaskService", "deleteById", 
+                    "Task amb id " + id + " no trobada per eliminar");
+            }
+            return result;
+        }catch(Exception e){
+            log.error("TaskService", "deleteById", "Error eliminant taska");
+            return 0;
+        }
     }
 
 }
