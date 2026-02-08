@@ -50,9 +50,7 @@ public class Task {
     public void setId(long id) {
         this.id = id;
     }
-    public String getnomTasca() {
-        return nomTasca;
-    }
+    
     public void setNomTasca(String nomTasca) {
         this.nomTasca = nomTasca;
     }
@@ -86,7 +84,6 @@ public class Task {
     public void setUrlImage(String urlImage) {
         this.urlImage = urlImage;
     }
-
 
     public String getNomTasca() {
         return nomTasca;
